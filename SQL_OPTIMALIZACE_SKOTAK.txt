@@ -14,35 +14,35 @@ SELECT
 	BSEG.BUZEI,
 	BSEG.BSCHL,
 	BSEG.SHKZG,
-    CASE WHEN BSEG.SHKZG = 'H' THEN (-1) * BSEG.DMBTR ELSE BSEG.DMBTR END AS DMBTR, --  lepsi pouzit decode(BSEG.SHKZG, 'H', BSEG.SHKZG * (-1), BSEG.SHKZG) END AS DMBTR, 
-    COALESCE(BSEG.AUFNR, 'Kein SM-A Zuordnung') AS AUFNR, -- radeji pouzit nvl() funkci, bseg.aufnr nemusi byt varchar 
-    COALESCE(LFA1.LAND1, 'Andere') AS LAND1, -- radeji pouzit nvl() funkci, LFA1.LAND1 nemusi byt varchar 
+    CASE WHEN BSEG.SHKZG = 'H' THEN (-1) * BSEG.DMBTR ELSE BSEG.DMBTR END AS DMBTR, --  rather use decode(BSEG.SHKZG, 'H', BSEG.SHKZG * (-1), BSEG.SHKZG) END AS DMBTR, 
+    COALESCE(BSEG.AUFNR, 'Kein SM-A Zuordnung') AS AUFNR, -- rather use nvl() function, bseg.aufnr don't have to be type of "varchar" 
+    COALESCE(LFA1.LAND1, 'Andere') AS LAND1, -- rather use nvl() funkci, LFA1.LAND1  don't have to be type of "varchar" 
     LFA1.LIFNR,
     LFA1.ZSYSNAME,
     BKPF.BLART as BLART,
     BKPF.BUDAT as BUDAT,
     BKPF.CPUDT as CPUDT
 FROM "DTAG_DEV_CSBI_CELONIS_DATA"."dtag.dev.csbi.celonis.data.elog::V_RSEG" AS RSEG
-LEFT JOIN "DTAG_DEV_CSBI_CELONIS_WORK"."dtag.dev.csbi.celonis.app.p2p_elog::__P2P_REF_CASES" AS EKPO ON 1=1 -- neni potřeba používat klič 1 = 1
+LEFT JOIN "DTAG_DEV_CSBI_CELONIS_WORK"."dtag.dev.csbi.celonis.app.p2p_elog::__P2P_REF_CASES" AS EKPO ON 1=1 -- redundant key 1 = 1
     AND RSEG.ZSYSNAME = EKPO.SOURCE_SYSTEM
     AND RSEG.MANDT = EKPO.MANDT
-    AND RSEG.EBELN || RSEG.EBELP = EKPO.EBELN || EKPO.EBELP -- využil bych concat() funkci, cely left join je lepsi dat az za všechny inner joiny
-INNER JOIN "DTAG_DEV_CSBI_CELONIS_DATA"."dtag.dev.csbi.celonis.data.elog::V_BKPF" AS BKPF ON 1=1 -- neni potřeba používat klíč 1 = 1
+    AND RSEG.EBELN || RSEG.EBELP = EKPO.EBELN || EKPO.EBELP -- rather useconcat() funkci, all left join's rather use on the end of the code
+INNER JOIN "DTAG_DEV_CSBI_CELONIS_DATA"."dtag.dev.csbi.celonis.data.elog::V_BKPF" AS BKPF ON 1=1 -- redundant key 1 = 1
     AND BKPF.AWKEY = RSEG.AWKEY
     AND RSEG.ZSYSNAME = BKPF.ZSYSNAME
-    AND RSEG.MANDT in ('200') -- lepší použít "=" místo "in" 
-INNER JOIN "DTAG_DEV_CSBI_CELONIS_DATA"."dtag.dev.csbi.celonis.data.elog::V_BSEG" AS BSEG ON 1=1 -- není potřeba používat klíč 1 = 1 
-    AND DATS_IS_VALID(BSEG.ZFBDT) = 1 -- pokud neni funkce vytvořená (možná v SAP HANA je - nevím), tak script spadne 
+    AND RSEG.MANDT in ('200') -- rather use "=" instead of "in" 
+INNER JOIN "DTAG_DEV_CSBI_CELONIS_DATA"."dtag.dev.csbi.celonis.data.elog::V_BSEG" AS BSEG ON 1=1 -- redundant key 1 = 1
+    AND DATS_IS_VALID(BSEG.ZFBDT) = 1 -- if the funciton is not created (maybe in SAP HANA is), script will not run
     AND BSEG.KOART = 'K'
-    AND CAST(BSEG.GJAHR AS INT) = 2020 -- lepsi pouzit to_number() funkci
+    AND CAST(BSEG.GJAHR AS INT) = 2020 -- rather use to_number() function
     AND BKPF.ZSYSNAME = BSEG.ZSYSNAME
     AND BKPF.MANDT = BSEG.MANDT
     AND BKPF.BUKRS = BSEG.BUKRS
     AND BKPF.GJAHR = BSEG.GJAHR
     AND BKPF.BELNR = BSEG.BELNR
-    AND BSEG.DMBTR*-1 >= 0 -- -1 by mělo být v závorce (v některých databázích spadne, někde ne)
+    AND BSEG.DMBTR*-1 >= 0 -- -1 should be in brackets --> (-1)
 INNER JOIN (SELECT * FROM "DTAG_DEV_CSBI_CELONIS_DATA"."dtag.dev.csbi.celonis.data.elog::V_LFA1" AS TEMP 
-            WHERE TEMP.LIFNR > '020000000') AS LFA1 ON 1=1 -- není nutné využívát vnořený select, stačí inner join a přidat podmínku u joinu "and TEMP.LIFNR > '020000000'"
+            WHERE TEMP.LIFNR > '020000000') AS LFA1 ON 1=1 -- not nessecery use nested select, rather use inner join with condition "and TEMP.LIFNR > '020000000'"
     AND BSEG.ZSYSNAME = LFA1.ZSYSNAME
     AND BSEG.LIFNR=LFA1.LIFNR
     AND BSEG.MANDT=LFA1.MANDT
