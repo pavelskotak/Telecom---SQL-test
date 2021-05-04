@@ -31,7 +31,7 @@ INNER JOIN "DTAG_DEV_CSBI_CELONIS_DATA"."dtag.dev.csbi.celonis.data.elog::V_BKPF
     AND BKPF.AWKEY = RSEG.AWKEY
     AND RSEG.ZSYSNAME = BKPF.ZSYSNAME
     AND RSEG.MANDT in ('200') -- lepší použít "=" místo "in" 
-INNER JOIN "DTAG_DEV_CSBI_CELONIS_DATA"."dtag.dev.csbi.celonis.data.elog::V_BSEG" AS BSEG ON 1=1
+INNER JOIN "DTAG_DEV_CSBI_CELONIS_DATA"."dtag.dev.csbi.celonis.data.elog::V_BSEG" AS BSEG ON 1=1 -- není potřeba používat klíč 1 = 1 
     AND DATS_IS_VALID(BSEG.ZFBDT) = 1 -- pokud neni funkce vytvořená (možná v SAP HANA je - nevím), tak script spadne 
     AND BSEG.KOART = 'K'
     AND CAST(BSEG.GJAHR AS INT) = 2020 -- lepsi pouzit to_number() funkci
@@ -40,7 +40,7 @@ INNER JOIN "DTAG_DEV_CSBI_CELONIS_DATA"."dtag.dev.csbi.celonis.data.elog::V_BSEG
     AND BKPF.BUKRS = BSEG.BUKRS
     AND BKPF.GJAHR = BSEG.GJAHR
     AND BKPF.BELNR = BSEG.BELNR
-    AND BSEG.DMBTR*-1 >= 0 -- -1 musí být v závorkách tj. *(-1)
+    AND BSEG.DMBTR*-1 >= 0 -- -1 by mělo být v závorce (v některých databázích spadne, někde ne)
 INNER JOIN (SELECT * FROM "DTAG_DEV_CSBI_CELONIS_DATA"."dtag.dev.csbi.celonis.data.elog::V_LFA1" AS TEMP 
             WHERE TEMP.LIFNR > '020000000') AS LFA1 ON 1=1 -- není nutné využívát vnořený select, stačí inner join a přidat podmínku u joinu "and TEMP.LIFNR > '020000000'"
     AND BSEG.ZSYSNAME = LFA1.ZSYSNAME
