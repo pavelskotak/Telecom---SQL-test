@@ -26,11 +26,11 @@ FROM "DTAG_DEV_CSBI_CELONIS_DATA"."dtag.dev.csbi.celonis.data.elog::V_RSEG" AS R
 LEFT JOIN "DTAG_DEV_CSBI_CELONIS_WORK"."dtag.dev.csbi.celonis.app.p2p_elog::__P2P_REF_CASES" AS EKPO ON 1=1 -- redundant key 1 = 1
     AND RSEG.ZSYSNAME = EKPO.SOURCE_SYSTEM
     AND RSEG.MANDT = EKPO.MANDT
-    AND RSEG.EBELN || RSEG.EBELP = EKPO.EBELN || EKPO.EBELP -- rather useconcat() funkci, all left join's rather use on the end of the code
+    AND RSEG.EBELN || RSEG.EBELP = EKPO.EBELN || EKPO.EBELP -- rather use concat() function, all left join's use on the end of the code (firstly inner joins then left joins)
 INNER JOIN "DTAG_DEV_CSBI_CELONIS_DATA"."dtag.dev.csbi.celonis.data.elog::V_BKPF" AS BKPF ON 1=1 -- redundant key 1 = 1
     AND BKPF.AWKEY = RSEG.AWKEY
     AND RSEG.ZSYSNAME = BKPF.ZSYSNAME
-    AND RSEG.MANDT in ('200') -- rather use "=" instead of "in" 
+    AND RSEG.MANDT in ('200') -- rather use "=" instead of "in" (better performance)
 INNER JOIN "DTAG_DEV_CSBI_CELONIS_DATA"."dtag.dev.csbi.celonis.data.elog::V_BSEG" AS BSEG ON 1=1 -- redundant key 1 = 1
     AND DATS_IS_VALID(BSEG.ZFBDT) = 1 -- if the funciton is not created (maybe in SAP HANA is), script will not run
     AND BSEG.KOART = 'K'
